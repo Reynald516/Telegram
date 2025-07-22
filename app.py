@@ -1,34 +1,47 @@
 from flask import Flask, request, jsonify
 from responses import get_response
+import requests
 
-app = Flask(_name_)
+app = Flask(_name)  # <- ini salah sebelumnya: _name harusnya _name_
 
-@app.route('/webhook',
-method=['POST'])
+@app.route('/')
+def home():
+    return "✅ Chatbot CS is Live!"
+
+@app.route('/webhook', methods=['POST'])  # <- methods, bukan method
 def telegram_webhook():
     data = request.get_json()
-    # ambil chat_id dan message
+
+    # Pastikan struktur JSON sesuai
+    if "message" not in data:
+        return jsonify({"ok": False, "error": "No message found"}), 400
+
     chat_id = data['message']['chat']['id']
-    text = data['message']['text']
+    text = data['message'].get('text', '')
 
-    # balasan sederhana
-    reply = "Halo! Kamu bilang: " + text
+    reply = f"Halo! Kamu bilang: {text}"
 
-    # kirim balasan via Telegram API
-    requests.post(f"https://api.telegram.org/bot{7529576898:AAF6yPDIOhbhFRhHTh6Qff32bgDCXf_nGiY}/sendMessage", json={
+    # GANTI token bot Telegram kamu yang valid
+    TELEGRAM_BOT_TOKEN = "7529576898:AAF6yPDIOhbhFRhHTh6Qff32bgDCXf_nGiY"
+
+    send_message_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    response = requests.post(send_message_url, json={
         "chat_id": chat_id,
         "text": reply
     })
-    return jsonify({"ok": True})
 
-def home():
-    return "✅ Chatbot CS is Live!"
+    return jsonify({"ok": True, "response": response.json()})
+
 
 @app.route("/chat", methods=["POST"])
 def chat():
     user_input = request.json.get("message")
+    if not user_input:
+        return jsonify({"error": "No message provided"}), 400
+
     response = get_response(user_input)
     return jsonify({"response": response})
+
 
 if _name_ == "_main_":
     app.run(debug=True)
