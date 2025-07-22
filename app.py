@@ -3,7 +3,24 @@ from responses import get_response
 
 app = Flask(_name_)
 
-@app.route("/")
+@app.route('/webhook',
+method=['POST'])
+def telegram_webhook():
+    data = request.get_json()
+    # ambil chat_id dan message
+    chat_id = data['message']['chat']['id']
+    text = data['message']['text']
+
+    # balasan sederhana
+    reply = "Halo! Kamu bilang: " + text
+
+    # kirim balasan via Telegram API
+    requests.post(f"https://api.telegram.org/bot{7529576898:AAF6yPDIOhbhFRhHTh6Qff32bgDCXf_nGiY}/sendMessage", json={
+        "chat_id": chat_id,
+        "text": reply
+    })
+    return jsonify({"ok": True})
+
 def home():
     return "✅ Chatbot CS is Live!"
 
