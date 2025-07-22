@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from responses import get_response
 import requests
 
-app = Flask(_name)  # <- ini salah sebelumnya: _name harusnya _name_
+app = Flask(_name_)  # <- ini salah sebelumnya: _name harusnya _name_
 
 @app.route('/')
 def home():
